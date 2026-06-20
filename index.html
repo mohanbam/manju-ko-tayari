@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>Manju ko Tayari</title>
+<meta name="description" content="Nepali number practice app" />
+
+<!-- PWA / iOS install support -->
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#534AB7" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Manju ko Tayari" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<link rel="icon" href="icon-192.png" />
+
+<style>
+  :root {
+    --bg: #FAF9F6;
+    --card: #FFFFFF;
+    --border: rgba(0,0,0,0.1);
+    --border-strong: rgba(0,0,0,0.18);
+    --text-primary: #1C1B1A;
+    --text-secondary: #6B6A66;
+    --text-tertiary: #9B9A95;
+    --purple-50:#EEEDFE; --purple-200:#AFA9EC; --purple-600:#534AB7; --purple-800:#3C3489; --purple-900:#26215C;
+    --teal-50:#E1F5EE; --teal-200:#5DCAA5; --teal-600:#0F6E56; --teal-800:#085041;
+    --green-50:#EAF3DE; --green-200:#97C459; --green-800:#27500A;
+    --red-50:#FCEBEB; --red-200:#F09595; --red-800:#791F1F;
+    --radius-md: 8px;
+    --radius-lg: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Devanagari", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161514;
+      --card: #211F1D;
+      --border: rgba(255,255,255,0.12);
+      --border-strong: rgba(255,255,255,0.2);
+      --text-primary: #F2F1ED;
+      --text-secondary: #B4B2A9;
+      --text-tertiary: #888780;
+      --purple-50:#3C3489; --purple-200:#7F77DD; --purple-600:#AFA9EC; --purple-800:#CECBF6; --purple-900:#EEEDFE;
+      --teal-50:#085041; --teal-200:#5DCAA5; --teal-600:#9FE1CB; --teal-800:#E1F5EE;
+      --green-50:#27500A; --green-200:#97C459; --green-800:#EAF3DE;
+      --red-50:#791F1F; --red-200:#F09595; --red-800:#FCEBEB;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { background: var(--bg); color: var(--text-primary); height: 100%; }
+  body {
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    overscroll-behavior-y: contain;
+  }
+  .app { padding: 1.25rem 1rem 2rem; max-width: 480px; margin: 0 auto; min-height: 100vh; }
+
+  .header { text-align: center; margin-bottom: 1.25rem; padding-top: 0.5rem; }
+  .app-title { font-size: 22px; font-weight: 600; color: var(--text-primary); }
+  .app-sub { font-size: 13px; color: var(--text-secondary); margin-top: 3px; }
+
+  .streak-bar { display: flex; justify-content: space-between; align-items: center; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px 6px; margin-bottom: 1rem; }
+  .streak-item { text-align: center; flex: 1; }
+  .streak-val { font-size: 18px; font-weight: 600; color: var(--text-primary); }
+  .streak-lbl { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+
+  .level-tabs { display: flex; gap: 6px; margin-bottom: 0.75rem; }
+  .level-btn { flex: 1; padding: 8px 4px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--card); font-size: 12px; color: var(--text-secondary); cursor: pointer; text-align: center; transition: all 0.15s; }
+  .level-btn.active { background: var(--purple-50); border-color: var(--purple-200); color: var(--purple-800); font-weight: 600; }
+  .level-btn span { font-size: 10px; opacity: 0.75; }
+
+  .mode-toggle { display: flex; gap: 6px; margin-bottom: 1.25rem; }
+  .mode-btn { flex: 1; padding: 9px 6px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--card); font-size: 13px; color: var(--text-secondary); cursor: pointer; text-align: center; transition: all 0.15s; }
+  .mode-btn.active { background: var(--teal-50); border-color: var(--teal-200); color: var(--teal-800); font-weight: 600; }
+
+  .question-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem 1.25rem; margin-bottom: 1rem; text-align: center; }
+  .q-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 10px; letter-spacing: 0.02em; }
+  .q-main { font-size: 32px; font-weight: 600; color: var(--text-primary); line-height: 1.25; word-break: break-word; }
+  .q-hint { font-size: 12px; color: var(--text-tertiary); margin-top: 8px; }
+
+  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+  .opt-btn { padding: 16px 8px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--card); font-size: 15px; color: var(--text-primary); cursor: pointer; text-align: center; transition: all 0.15s; line-height: 1.4; min-height: 54px; }
+  .opt-btn:active { transform: scale(0.97); }
+  .opt-btn.correct { background: var(--green-50); border-color: var(--green-200); color: var(--green-800); font-weight: 600; }
+  .opt-btn.wrong { background: var(--red-50); border-color: var(--red-200); color: var(--red-800); }
+  .opt-btn:disabled { cursor: default; }
+
+  .type-input-wrap { display: flex; gap: 8px; margin-bottom: 1rem; }
+  .type-input-wrap input { flex: 1; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 17px; background: var(--card); color: var(--text-primary); }
+  .type-input-wrap input:focus { outline: none; border-color: var(--purple-200); }
+  .type-input-wrap button { padding: 14px 18px; border: 1px solid var(--border-strong); border-radius: var(--radius-md); background: var(--card); color: var(--text-primary); cursor: pointer; font-size: 14px; font-weight: 600; }
+
+  .feedback { padding: 12px 14px; border-radius: var(--radius-md); margin-bottom: 1rem; font-size: 14px; text-align: center; font-weight: 600; }
+  .feedback.correct { background: var(--green-50); color: var(--green-800); }
+  .feedback.wrong { background: var(--red-50); color: var(--red-800); }
+
+  .next-btn { width: 100%; padding: 15px; border: 1px solid var(--border-strong); border-radius: var(--radius-md); background: var(--card); color: var(--text-primary); font-size: 16px; cursor: pointer; font-weight: 600; }
+  .next-btn:active { transform: scale(0.98); }
+
+  .progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+  .progress-bar { flex: 1; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--purple-600); border-radius: 3px; transition: width 0.3s; }
+  .progress-txt { font-size: 12px; color: var(--text-secondary); min-width: 44px; text-align: right; }
+
+  .result-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem 1.5rem; text-align: center; }
+  .result-score { font-size: 44px; font-weight: 700; color: var(--purple-600); }
+  .result-msg { font-size: 16px; color: var(--text-primary); margin-top: 10px; font-weight: 600; }
+  .result-sub { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+  .result-btns { display: flex; gap: 8px; margin-top: 1.5rem; }
+  .result-btns button { flex: 1; padding: 13px; border: 1px solid var(--border-strong); border-radius: var(--radius-md); background: var(--card); font-size: 14px; cursor: pointer; color: var(--text-primary); font-weight: 600; }
+
+  .footer-note { text-align: center; font-size: 11px; color: var(--text-tertiary); margin-top: 1.5rem; }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <div class="app-title">🔢 Manju ko Tayari</div>
+    <div class="app-sub">नेपाली संख्या अभ्यास</div>
+  </div>
+
+  <div class="streak-bar">
+    <div class="streak-item"><div class="streak-val" id="stat-streak">0</div><div class="streak-lbl">Streak 🔥</div></div>
+    <div class="streak-item"><div class="streak-val" id="stat-correct">0</div><div class="streak-lbl">सही</div></div>
+    <div class="streak-item"><div class="streak-val" id="stat-total">0</div><div class="streak-lbl">जम्मा</div></div>
+    <div class="streak-item"><div class="streak-val" id="stat-pct">—</div><div class="streak-lbl">Accuracy</div></div>
+  </div>
+
+  <div id="quiz-section">
+    <div class="level-tabs">
+      <div class="level-btn active" onclick="setLevel(0)">Easy<br><span>१–१,०००</span></div>
+      <div class="level-btn" onclick="setLevel(1)">Medium<br><span>१,०००–९९,०००</span></div>
+      <div class="level-btn" onclick="setLevel(2)">Hard<br><span>१ लाख+</span></div>
+    </div>
+
+    <div class="mode-toggle">
+      <div class="mode-btn active" onclick="setMode('num2word')">संख्या → शब्द</div>
+      <div class="mode-btn" onclick="setMode('word2num')">शब्द → संख्या</div>
+    </div>
+
+    <div class="progress-row">
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="progress-txt" id="prog-txt">0 / 10</div>
+    </div>
+
+    <div class="question-card">
+      <div class="q-label" id="q-label">यो संख्या नेपालीमा के भन्छन्?</div>
+      <div class="q-main" id="q-main">—</div>
+      <div class="q-hint" id="q-hint"></div>
+    </div>
+
+    <div id="options-area">
+      <div class="options-grid" id="opts-grid"></div>
+    </div>
+
+    <div id="type-area" class="hidden">
+      <div class="type-input-wrap">
+        <input type="number" inputmode="numeric" id="type-input" placeholder="संख्या टाइप गर्नुस्..." />
+        <button onclick="checkTyped()">जाँच्नुस्</button>
+      </div>
+    </div>
+
+    <div class="feedback hidden" id="feedback-box"></div>
+    <button class="next-btn hidden" id="next-btn" onclick="nextQuestion()">अर्को प्रश्न →</button>
+  </div>
+
+  <div id="result-section" class="hidden">
+    <div class="result-card">
+      <div class="result-score" id="res-score">—</div>
+      <div class="result-msg" id="res-msg">—</div>
+      <div class="result-sub" id="res-sub">—</div>
+      <div class="result-btns">
+        <button onclick="restartSame()">फेरि खेल्नुस्</button>
+        <button onclick="restartNew()">अर्को Level</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">बनाइदियो ❤️</div>
+</div>
+
+<script>
+const NEPALI_NUMS = {
+  0:'शून्य',1:'एक',2:'दुई',3:'तीन',4:'चार',5:'पाँच',6:'छ',7:'सात',8:'आठ',9:'नौ',
+  10:'दस',11:'एघार',12:'बाह्र',13:'तेह्र',14:'चौध',15:'पन्ध्र',16:'सोह्र',17:'सत्र',18:'अठार',19:'उन्नाइस',
+  20:'बीस',21:'एक्काइस',22:'बाइस',23:'तेइस',24:'चौबीस',25:'पच्चीस',26:'छब्बीस',27:'सत्ताइस',28:'अठ्ठाइस',29:'उनन्तीस',
+  30:'तीस',31:'एकतीस',32:'बत्तीस',33:'तेत्तीस',34:'चौँतीस',35:'पैँतीस',36:'छत्तीस',37:'सैँतीस',38:'अठ्तीस',39:'उनन्चालीस',
+  40:'चालीस',41:'एकचालीस',42:'बयालीस',43:'त्रिचालीस',44:'चवालीस',45:'पैँतालीस',46:'छयालीस',47:'सत्चालीस',48:'अठचालीस',49:'उनन्पचास',
+  50:'पचास',51:'एकाउन्न',52:'बाउन्न',53:'त्रिपन्न',54:'चौपन्न',55:'पचपन्न',56:'छपन्न',57:'सन्ताउन्न',58:'अन्ठाउन्न',59:'उनन्साठी',
+  60:'साठी',61:'एकसठी',62:'बयसठी',63:'त्रिसठी',64:'चौँसठी',65:'पैँसठी',66:'छयसठी',67:'सत्सठी',68:'अठसठी',69:'उनन्सत्तरी',
+  70:'सत्तरी',71:'एकहत्तर',72:'बहत्तर',73:'त्रिहत्तर',74:'चौहत्तर',75:'पचहत्तर',76:'छयहत्तर',77:'सतहत्तर',78:'अठहत्तर',79:'उनासी',
+  80:'असी',81:'एकासी',82:'बयासी',83:'त्रियासी',84:'चौरासी',85:'पचासी',86:'छयासी',87:'सतासी',88:'अठासी',89:'उनान्नब्बे',
+  90:'नब्बे',91:'एकानब्बे',92:'बयानब्बे',93:'त्रियानब्बे',94:'चौरानब्बे',95:'पन्चानब्बे',96:'छयानब्बे',97:'सन्तानब्बे',98:'अन्ठानब्बे',99:'उनान्सय'
+};
+
+function numToNepali(n) {
+  if (n === 0) return 'शून्य';
+  if (NEPALI_NUMS[n]) return NEPALI_NUMS[n];
+  let result = '';
+  const lakh = Math.floor(n / 100000);
+  const hajar = Math.floor((n % 100000) / 1000);
+  const say = Math.floor((n % 1000) / 100);
+  const rest = n % 100;
+  if (lakh > 0) result += (NEPALI_NUMS[lakh] || numToNepali(lakh)) + ' लाख ';
+  if (hajar > 0) result += (NEPALI_NUMS[hajar] || numToNepali(hajar)) + ' हजार ';
+  if (say > 0) result += (NEPALI_NUMS[say] || numToNepali(say)) + ' सय ';
+  if (rest > 0) result += (NEPALI_NUMS[rest] || '');
+  return result.trim();
+}
+
+const LEVELS = [
+  { min:1, max:999, name:'Easy' },
+  { min:1000, max:99000, name:'Medium' },
+  { min:100000, max:1000000, name:'Hard' }
+];
+const QUESTIONS_PER_ROUND = 10;
+
+let level = 0;
+let mode = 'num2word';
+let currentNum = 0;
+let currentAnswer = '';
+let answered = false;
+let qCount = 0;
+let correctCount = 0;
+let totalCorrect = 0;
+let totalAnswered = 0;
+let currentStreak = 0;
+let bestStreak = 0;
+
+function setLevel(l) {
+  level = l;
+  document.querySelectorAll('.level-btn').forEach((b,i) => b.classList.toggle('active', i===l));
+  startRound();
+}
+
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.mode-btn').forEach((b,i) => b.classList.toggle('active', ['num2word','word2num'][i]===m));
+  startRound();
+}
+
+function getRandNum() {
+  if (level === 0) {
+    const pools = [
+      ...Array.from({length:99},(_,i)=>i+1),
+      100,200,300,400,500,600,700,800,900,
+      150,250,350,450,550,650,750,850,950,
+      ...Array.from({length:9},(_,i)=>(i+1)*100 + Math.floor(Math.random()*99)+1)
+    ];
+    return pools[Math.floor(Math.random()*pools.length)];
+  }
+  if (level === 1) {
+    const r = Math.random();
+    if (r < 0.3) {
+      const niceHajar = [1000,2000,3000,5000,10000,15000,20000,25000,50000,75000,56000,19000,45000,30000];
+      return niceHajar[Math.floor(Math.random()*niceHajar.length)];
+    }
+    const base = Math.floor(Math.random()*90)*1000 + 1000;
+    const extra = Math.floor(Math.random()*999);
+    return base + extra;
+  }
+  const lakhVals = [100000,150000,200000,250000,300000,500000,750000,1000000,125000,175000,225000,325000,450000,600000,800000];
+  return lakhVals[Math.floor(Math.random()*lakhVals.length)];
+}
+
+function getWrongOptions(correct, n) {
+  const wrongs = [];
+  if (mode === 'num2word') {
+    const candidates = [];
+    const lakh = Math.floor(n/100000);
+    const hajar = Math.floor((n%100000)/1000);
+    const say = Math.floor((n%1000)/100);
+    const rest = n%100;
+    if (hajar > 0) {
+      const swapped = hajar*100 + say*1000 + rest + lakh*100000;
+      if (swapped !== n && swapped > 0 && swapped <= 1000000) candidates.push(numToNepali(swapped));
+    }
+    for (let i=0;i<20;i++) {
+      const r = getRandNum();
+      const w = numToNepali(r);
+      if (w !== correct && !candidates.includes(w)) candidates.push(w);
+      if (candidates.length >= 15) break;
+    }
+    while (wrongs.length < 3 && candidates.length > 0) {
+      const idx = Math.floor(Math.random()*candidates.length);
+      wrongs.push(candidates.splice(idx,1)[0]);
+    }
+  } else {
+    const variants = [];
+    const lakh = Math.floor(n/100000);
+    const hajar = Math.floor((n%100000)/1000);
+    const say = Math.floor((n%1000)/100);
+    if (hajar > 0 && say >= 0) {
+      variants.push(hajar*100 + say*1000 + (n%100) + lakh*100000);
+    }
+    for (let i=0;i<15;i++) {
+      const r = getRandNum();
+      if (r !== n && !variants.includes(r)) variants.push(r);
+    }
+    while (wrongs.length < 3 && variants.length > 0) {
+      const idx = Math.floor(Math.random()*variants.length);
+      const v = variants.splice(idx,1)[0];
+      if (v !== n && v > 0) wrongs.push(v);
+    }
+  }
+  return wrongs;
+}
+
+function shuffle(arr) {
+  for (let i=arr.length-1;i>0;i--) {
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function startRound() {
+  qCount = 0; correctCount = 0;
+  document.getElementById('quiz-section').classList.remove('hidden');
+  document.getElementById('result-section').classList.add('hidden');
+  nextQuestion();
+}
+
+function nextQuestion() {
+  if (qCount >= QUESTIONS_PER_ROUND) { showResult(); return; }
+  answered = false;
+  document.getElementById('feedback-box').classList.add('hidden');
+  document.getElementById('next-btn').classList.add('hidden');
+
+  currentNum = getRandNum();
+  const nepWord = numToNepali(currentNum);
+  const formatted = currentNum.toLocaleString('en-IN');
+
+  if (mode === 'num2word') {
+    currentAnswer = nepWord;
+    document.getElementById('q-label').textContent = 'यो संख्या नेपालीमा के भन्छन्?';
+    document.getElementById('q-main').textContent = formatted;
+    document.getElementById('q-hint').textContent = '';
+    showMCQ(nepWord, currentNum);
+  } else {
+    currentAnswer = String(currentNum);
+    document.getElementById('q-label').textContent = 'यो नेपाली शब्दको संख्या कति हो?';
+    document.getElementById('q-main').textContent = nepWord;
+    document.getElementById('q-hint').textContent = '(संख्या टाइप गर्नुस्)';
+    showTypeInput();
+  }
+
+  qCount++;
+  updateProgress();
+}
+
+function showMCQ(correct, n) {
+  document.getElementById('options-area').classList.remove('hidden');
+  document.getElementById('type-area').classList.add('hidden');
+  const wrongs = getWrongOptions(correct, n);
+  const opts = shuffle([correct, ...wrongs]);
+  const grid = document.getElementById('opts-grid');
+  grid.innerHTML = '';
+  opts.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.textContent = opt;
+    btn.onclick = () => checkMCQ(opt, correct, btn);
+    grid.appendChild(btn);
+  });
+}
+
+function showTypeInput() {
+  document.getElementById('options-area').classList.add('hidden');
+  document.getElementById('type-area').classList.remove('hidden');
+  const inp = document.getElementById('type-input');
+  inp.value = '';
+  inp.disabled = false;
+  setTimeout(() => inp.focus(), 100);
+}
+
+function checkMCQ(chosen, correct, btn) {
+  if (answered) return;
+  answered = true;
+  const grid = document.getElementById('opts-grid');
+  Array.from(grid.children).forEach(b => {
+    b.disabled = true;
+    if (b.textContent === correct) b.classList.add('correct');
+    else if (b === btn) b.classList.add('wrong');
+  });
+  showFeedback(chosen === correct, correct);
+}
+
+function checkTyped() {
+  if (answered) return;
+  const inp = document.getElementById('type-input');
+  const val = inp.value.trim().replace(/,/g,'');
+  if (!val) return;
+  inp.disabled = true;
+  answered = true;
+  const isCorrect = val === String(currentNum);
+  showFeedback(isCorrect, currentNum.toLocaleString('en-IN'));
+}
+
+function showFeedback(isCorrect, correctDisplay) {
+  if (isCorrect) {
+    correctCount++; totalCorrect++; currentStreak++;
+    if (currentStreak > bestStreak) bestStreak = currentStreak;
+  } else {
+    currentStreak = 0;
+  }
+  totalAnswered++;
+  updateStats();
+  saveProgress();
+  const fb = document.getElementById('feedback-box');
+  fb.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
+  fb.textContent = isCorrect
+    ? '✓ सही! राम्रो गर्नुभयो।'
+    : '✗ गलत — सही उत्तर: ' + correctDisplay;
+  fb.classList.remove('hidden');
+  document.getElementById('next-btn').classList.remove('hidden');
+}
+
+function updateProgress() {
+  const pct = ((qCount-1)/QUESTIONS_PER_ROUND)*100;
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-txt').textContent = (qCount-1) + ' / ' + QUESTIONS_PER_ROUND;
+}
+
+function updateStats() {
+  document.getElementById('stat-streak').textContent = currentStreak;
+  document.getElementById('stat-correct').textContent = totalCorrect;
+  document.getElementById('stat-total').textContent = totalAnswered;
+  const pct = totalAnswered > 0 ? Math.round((totalCorrect/totalAnswered)*100) + '%' : '—';
+  document.getElementById('stat-pct').textContent = pct;
+}
+
+function showResult() {
+  document.getElementById('quiz-section').classList.add('hidden');
+  document.getElementById('result-section').classList.remove('hidden');
+  const pct = Math.round((correctCount/QUESTIONS_PER_ROUND)*100);
+  document.getElementById('res-score').textContent = correctCount + ' / ' + QUESTIONS_PER_ROUND;
+  let msg = '', sub = '';
+  if (pct === 100) { msg = 'Perfect! एकदम राम्रो!'; sub = 'तपाईं नेपाली संख्यामा expert हुनुहुन्छ!'; }
+  else if (pct >= 80) { msg = 'उत्कृष्ट!'; sub = 'अझ अभ्यास गर्दा perfect हुन्छ।'; }
+  else if (pct >= 60) { msg = 'राम्रो प्रयास!'; sub = 'अझ practice गर्दा improvement आउँछ।'; }
+  else { msg = 'जारी राख्नुस्!'; sub = 'अभ्यासले सिद्ध बनाउँछ — हार नमान्नुस्।'; }
+  document.getElementById('res-msg').textContent = msg;
+  document.getElementById('res-sub').textContent = sub;
+}
+
+function restartSame() { startRound(); }
+function restartNew() {
+  const next = (level+1) % 3;
+  setLevel(next);
+}
+
+document.getElementById('type-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') checkTyped();
+});
+
+// Persist stats locally on the device (per-user, not shared)
+function saveProgress() {
+  try {
+    localStorage.setItem('manju_stats', JSON.stringify({
+      totalCorrect, totalAnswered, bestStreak
+    }));
+  } catch(e) {}
+}
+function loadProgress() {
+  try {
+    const saved = localStorage.getItem('manju_stats');
+    if (saved) {
+      const d = JSON.parse(saved);
+      totalCorrect = d.totalCorrect || 0;
+      totalAnswered = d.totalAnswered || 0;
+      bestStreak = d.bestStreak || 0;
+      updateStats();
+    }
+  } catch(e) {}
+}
+
+loadProgress();
+startRound();
+
+// Register service worker for offline use
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
