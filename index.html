@@ -445,6 +445,26 @@ function showResult() {
   else { msg = 'जारी राख्नुस्!'; sub = 'अभ्यासले सिद्ध बनाउँछ — हार नमान्नुस्।'; }
   document.getElementById('res-msg').textContent = msg;
   document.getElementById('res-sub').textContent = sub;
+
+  sendResultToSheet({
+    level: LEVELS[level].name,
+    mode: mode === 'num2word' ? 'संख्या→शब्द' : 'शब्द→संख्या',
+    score: correctCount,
+    total: QUESTIONS_PER_ROUND
+  });
+}
+
+// Sends each round's result to Google Sheet (fire-and-forget, no-cors so it won't block or error visibly)
+const SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbx6GquDl3BQOLT2aM37DfqTtBKlcDojYOiEKMW9tzPKCYl6Wy-HUQrg-Mu4-M6dtRVcBA/exec';
+function sendResultToSheet(data) {
+  try {
+    fetch(SHEET_WEBHOOK_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(data)
+    }).catch(() => {});
+  } catch (e) {}
 }
 
 function restartSame() { startRound(); }
